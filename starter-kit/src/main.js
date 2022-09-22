@@ -14,8 +14,8 @@ app.use(cors())
 app.use(bodyParser.json())
 
 // insert your router here
-
-
+const cards_router = require("./routers/cards.js")
+app.use('/cards', cards_router)
 //other
 
 app.listen(port, () => {
