@@ -1,0 +1,35 @@
+[
+    {
+        "id": 1,
+        "name": "Card n°1",
+        "members": [],
+        "description": "The first card implemented",
+        "labels": [],
+        "checklist": [],
+        "deadline": "27-09-2022",
+        "updatedAt": "22-09-2022",
+        "createdAt": "22-09-2022"
+    } , 
+    {
+        "id": 2,
+        "name": "Card n°2",
+        "members": [],
+        "description": "The second card implemented",
+        "labels": [],
+        "checklist": [],
+        "deadline": "27-09-2022",
+        "updatedAt": "23-09-2022",
+        "createdAt": "22-09-2022"
+    } , 
+    {
+        "id": 3,
+        "name": "Card n°3",
+        "members": [],
+        "description": "The third card implemented",
+        "labels": [],
+        "checklist": [],
+        "deadline": "27-09-2022",
+        "updatedAt": "23-09-2022",
+        "createdAt": "22-09-2022"
+    }
+]
