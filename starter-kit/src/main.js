@@ -22,6 +22,9 @@ app.use('/cards', cards_router)
 const lists_router = require("./routers/lists.routes")
 app.use('/lists', lists_router)
 
+// Boards router
+const boards_router = require("./routers/boards.routes")
+app.use('/boards', boards_router)
 
 //other
 
