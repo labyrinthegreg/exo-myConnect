@@ -1,15 +1,29 @@
 const cards = require('../models/cards.json')
 
-
+/**
+ * Get all cards
+ * @param {*} req 
+ * @param {*} res 
+ */
 const getCards = ((req, res) => {
     res.json(cards)
 })
 
+/**
+ * Get a card with a specific id
+ * @param {*} req 
+ * @param {*} res 
+ */
 const getCardById = ((req, res) => {
     const id = Number(req.params.id)  
     res.json(cards.find((card) => card.id === id))
 })
 
+/**
+ * Create a new card
+ * @param {*} req 
+ * @param {*} res 
+ */
 const createCard = ((req, res) => { 
     const newCard = {
         id: new Date().valueOf(),
@@ -26,6 +40,11 @@ const createCard = ((req, res) => {
     res.status(200).send(newCard)
 })
 
+/**
+ * Update a card
+ * @param {*} req 
+ * @param {*} res 
+ */
 const updateCard = ((req, res) => {
     const id = Number(req.params.id)  
     const index = cards.findIndex((card) => card.id === id)
@@ -44,6 +63,11 @@ const updateCard = ((req, res) => {
     res.status(200).json('Card updated with Id ' + id)
 })
 
+/**
+ * Delete a card
+ * @param {*} req 
+ * @param {*} res 
+ */
 const deleteCard = ((req, res) => { 
     const id = Number(req.params.id)
     const index = cards.findIndex((card) => card.id === id)

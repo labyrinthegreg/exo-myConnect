@@ -1,15 +1,29 @@
 const lists = require('../models/lists.json')
 
-
+/**
+ * Get all lists
+ * @param {*} req 
+ * @param {*} res 
+ */
 const getLists = ((req, res) => {
     res.json(lists)
 })
 
+/**
+ * Get a list with a specific id
+ * @param {*} req 
+ * @param {*} res 
+ */
 const getListById = ((req, res) => {
     const id = Number(req.params.id)  
     res.json(lists.find((list) => list.id === id))
 })
 
+/**
+ * Create a new list
+ * @param {*} req 
+ * @param {*} res 
+ */
 const createList = ((req, res) => { 
     const newList = {
         id: new Date().valueOf(),
@@ -21,6 +35,11 @@ const createList = ((req, res) => {
     res.status(200).send(newList)
 })
 
+/**
+ * Update a list
+ * @param {*} req 
+ * @param {*} res 
+ */
 const updateList = ((req, res) => {
     const id = Number(req.params.id)  
     const index = lists.findIndex((list) => list.id === id)
@@ -34,6 +53,11 @@ const updateList = ((req, res) => {
     res.status(200).json('List updated with Id ' + id)
 })
 
+/**
+ * Delete a list
+ * @param {*} req 
+ * @param {*} res 
+ */
 const deleteList = ((req, res) => { 
     const id = Number(req.params.id)
     const index = lists.findIndex((list) => list.id === id)

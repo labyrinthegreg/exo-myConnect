@@ -14,10 +14,11 @@ app.use(cors())
 app.use(bodyParser.json())
 
 // insert your router here
+// Cards router
 const cards_router = require("./routers/cards.routes")
 app.use('/cards', cards_router)
 
-
+// Lists router
 const lists_router = require("./routers/lists.routes")
 app.use('/lists', lists_router)
 
