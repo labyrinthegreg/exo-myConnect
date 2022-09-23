@@ -79,6 +79,39 @@ const updateList = ((req, res) => {
 })
 
 /**
+ * Update a list of cards in an initial list and in a recipient list to swith a card between the two lists
+ * @param {*} req 
+ * @param {*} res 
+ */
+const switchCardList = ((req, res) => {
+    const initialListId = Number(req.params.id)  
+    const recipientListId = Number(req.body.recipientId) 
+    const cardId = Number(req.body.cardId) 
+    const initialListIndex = lists.findIndex((list) => list.id === initialListId)
+    const recipientListIndex = lists.findIndex((list) => list.id === recipientListId)
+    let initialListCards = lists[initialListIndex].cards
+    let recipientListCards = lists[ recipientListIndex ].cards
+    let initialCardIndex = initialListCards.findIndex(card => card === cardId)
+    recipientListCards.push(initialListCards[initialCardIndex])
+    initialListCards.splice(initialCardIndex, 1)
+    const initialUpdatedList = {
+        id: lists[initialListIndex].id,
+        name: lists[initialListIndex].name,
+        cards: initialListCards,
+        createdAt: lists[initialListIndex].createdAt
+    }
+    const recipientUpdatedList = {
+        id: lists[recipientListIndex].id,
+        name: lists[recipientListIndex].name,
+        cards: recipientListCards,
+        createdAt: lists[recipientListIndex].createdAt
+    }
+    lists[ initialListIndex ] = initialUpdatedList
+    lists[ recipientListIndex ] = recipientUpdatedList
+    res.status(200).json('Card swith between list with id ' + initialListId + ' to list with id ' + recipientListId)
+})
+
+/**
  * Delete a list
  * @param {*} req 
  * @param {*} res 
@@ -90,4 +123,4 @@ const deleteList = ((req, res) => {
     res.status(200).json('List deleted with Id '+ id)
 })
 
-module.exports = {getLists , getListById, createList, createCardInList, updateList, deleteList}
+module.exports = {getLists , getListById, createList, createCardInList, updateList, switchCardList, deleteList}
