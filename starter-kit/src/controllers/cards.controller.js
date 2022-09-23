@@ -1,4 +1,5 @@
 const cards = require('../models/cards.json')
+const logger = require('../utils/logger')
 
 /**
  * Get all cards
@@ -26,7 +27,7 @@ const getCardById = ((req, res) => {
  */
 const createCard = ((req, res) => { 
     const newCard = {
-        id: new Date().valueOf(),
+        id: req.body.id ? req.body.id : new Date().valueOf(),
         name: req.body.name,
         members: req.body.members,
         description: req.body.description,
@@ -37,7 +38,9 @@ const createCard = ((req, res) => {
         createdAt: new Date(Date.now())
     }
     cards.push(newCard)
-    res.status(200).send(newCard)
+    if (!req.body.id) {
+        res.status(200).send(newCard)
+    }
 })
 
 /**

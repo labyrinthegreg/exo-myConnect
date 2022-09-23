@@ -1,4 +1,6 @@
 const lists = require('../models/lists.json')
+const logger = require('../utils/logger')
+const {createCard}  = require('./cards.controller')
 
 /**
  * Get all lists
@@ -35,6 +37,29 @@ const createList = ((req, res) => {
     res.status(200).send(newList)
 })
 
+
+/**
+ * Create a new card in a existing list
+ * @param {*} req 
+ * @param {*} res 
+ */
+const createCardInList = ((req, res) => {
+    const id = Number(req.params.id)
+    const index = lists.findIndex((list) => list.id === id)
+    req.body["id"] = new Date().valueOf()
+    createCard(req, res)
+    let updatedCards = lists[ index ].cards
+    updatedCards.push(req.body.id)
+    const updatedList = {
+        id: lists[index].id,
+        name: lists[index].name,
+        cards: updatedCards,
+        createdAt: lists[index].createdAt
+    }
+    lists[ index ] = updatedList
+    res.status(200).json('Card added in list with Id ' + id)
+})
+
 /**
  * Update a list
  * @param {*} req 
@@ -65,4 +90,4 @@ const deleteList = ((req, res) => {
     res.status(200).json('List deleted with Id '+ id)
 })
 
-module.exports = {getLists , getListById, createList, updateList, deleteList}
+module.exports = {getLists , getListById, createList, createCardInList, updateList, deleteList}
