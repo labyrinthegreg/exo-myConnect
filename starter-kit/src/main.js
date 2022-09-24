@@ -26,6 +26,10 @@ app.use('/lists', lists_router)
 const boards_router = require("./routers/boards.routes")
 app.use('/boards', boards_router)
 
+// User router
+const users_router = require("./routers/users.routes")
+app.use('/users', users_router)
+
 //other
 
 app.listen(port, () => {
