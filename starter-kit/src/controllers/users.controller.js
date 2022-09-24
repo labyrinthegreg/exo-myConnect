@@ -15,9 +15,14 @@ const getUsers = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const getUserById = ((req, res) => {
+const getUserById = (async (req, res) => {
     const id = Number(req.params.id)  
-    res.json(users.find((user) => user.id === id))
+    const user = await users.find((user) => user.id === id)
+    if (!req.body.noNeedResponse) {
+        res.json(user)
+    } else {
+        return user
+    }    
 })
 
 /**
@@ -25,7 +30,7 @@ const getUserById = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const createUser = ((req, res) => { 
+const createUser = (async (req, res) => { 
     const newUser = {
         id: req.body.id ? req.body.id : new Date().valueOf(),
         pseudo: req.body.pseudo,
@@ -33,7 +38,7 @@ const createUser = ((req, res) => {
         createdAt: new Date(Date.now()),
         boards: req.body.boards
     }
-    users.push(newUser)
+    await users.push(newUser) 
     res.status(200).send(newUser)
 })
 
@@ -42,7 +47,7 @@ const createUser = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const updateUser = ((req, res) => {
+const updateUser = (async (req, res) => {
     const id = Number(req.params.id)  
     const index = users.findIndex((user) => user.id === id)
     const updatedUser = {
@@ -52,8 +57,10 @@ const updateUser = ((req, res) => {
         createdAt: users[ index ].createdAt,
         boards: req.body.boards
     }
-    users[ index ] = updatedUser
-    res.status(200).json('User updated with Id ' + id)
+    await (users[ index ] = updatedUser)
+    if (!req.body.noNeedResponse) {
+        res.status(200).json('User updated with Id ' + id)
+    }
 })
 
 /**
@@ -61,10 +68,10 @@ const updateUser = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const deleteUser = ((req, res) => { 
+const deleteUser = (async (req, res) => { 
     const id = Number(req.params.id)
     const index = users.findIndex((user) => user.id === id)
-    users.splice(index, 1)
+    await users.splice(index, 1)
     res.status(200).json('User deleted with Id '+ id)
 })
 

@@ -1,4 +1,5 @@
 const boards = require('../models/boards.json')
+const {getUserById, updateUser } = require('./users.controller')
 const logger = require('../utils/logger')
 
 /**
@@ -25,7 +26,8 @@ const getBoardById = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const createBoard = ((req, res) => { 
+const createBoard = (async (req, res) => { 
+    const ownerId = req.body.ownerId
     const newBoard = {
         id: new Date().valueOf(),
         name: req.body.name,
@@ -34,6 +36,13 @@ const createBoard = ((req, res) => {
         createdAt: new Date(Date.now()),
         labels: req.body.labels
     }
+    req.params[ 'id' ] = ownerId
+    req.body['noNeedResponse'] = true
+    let owner = await getUserById(req, res)
+    owner.boards.push({ board: newBoard.id, owner: true })
+    req.body = owner
+    req.body['noNeedResponse'] = true
+    await updateUser(req, res)
     boards.push(newBoard)
     res.status(200).send(newBoard)
 })
