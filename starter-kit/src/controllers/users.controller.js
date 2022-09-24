@@ -64,6 +64,27 @@ const updateUser = (async (req, res) => {
 })
 
 /**
+ * Add a user to a board
+ * @param {*} req 
+ * @param {*} res 
+ */
+const addUsersToBoard = (async (req, res) => {
+    const boardId = Number(req.params.id)  
+    const usersId = req.body.usersId
+    await usersId.forEach(async userId => {
+        const index = users.findIndex((user) => user.id === userId)
+        let newBoard = { board: boardId, owner: false }
+        await users[index].boards.push(newBoard) 
+    });
+    if (usersId.length > 1) {
+        res.status(200).json('Users are now in the board ' + boardId)
+    } else {
+        res.status(200).json('User ' + usersId[0] + ' is now in the board'+ boardId)
+    }
+    
+})
+
+/**
  * Delete a user
  * @param {*} req 
  * @param {*} res 
@@ -75,4 +96,4 @@ const deleteUser = (async (req, res) => {
     res.status(200).json('User deleted with Id '+ id)
 })
 
-module.exports = { getUsers , getUserById, createUser, updateUser, deleteUser}
+module.exports = { getUsers , getUserById, createUser, updateUser, addUsersToBoard, deleteUser }
