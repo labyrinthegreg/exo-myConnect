@@ -1,13 +1,16 @@
-const boards = require('../models/boards.json')
+const { sequelize } = require('../models')
+const Board = sequelize.models.Board
 const {getUserById, updateUser } = require('./users.controller')
 const logger = require('../utils/logger')
+const { Sequelize } = require('sequelize')
 
 /**
  * Get all boards
  * @param {*} req 
  * @param {*} res 
  */
-const getBoards = ((req, res) => {
+const getBoards = (async (req, res) => {
+    const boards = await Board.findAll()
     res.json(boards)
 })
 
@@ -16,9 +19,10 @@ const getBoards = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const getBoardById = ((req, res) => {
+const getBoardById = (async (req, res) => {
     const id = Number(req.params.id)  
-    res.json(boards.find((board) => board.id === id))
+    const board = await Board.findByPk(id)
+    res.json(board)
 })
 
 /**
@@ -29,21 +33,20 @@ const getBoardById = ((req, res) => {
 const createBoard = (async (req, res) => { 
     const ownerId = req.body.ownerId
     const newBoard = {
-        id: new Date().valueOf(),
         name: req.body.name,
         lists: req.body.lists,
-        updatedAt: new Date(Date.now()),
-        createdAt: new Date(Date.now()),
         labels: req.body.labels
     }
+    const boardCreatedId = await (await Board.create(newBoard)).getDataValue('id')
     req.params[ 'id' ] = ownerId
     req.body['noNeedResponse'] = true
     let owner = await getUserById(req, res)
-    owner.boards.push({ board: newBoard.id, owner: true })
+    let ownerBoards = Array.from(JSON.parse(owner.boards))
+    ownerBoards.push({ board: boardCreatedId, owner: true })
+    owner.boards = ownerBoards
     req.body = owner
-    req.body['noNeedResponse'] = true
+    req.body[ 'noNeedResponse' ] = true
     await updateUser(req, res)
-    boards.push(newBoard)
     res.status(200).send(newBoard)
 })
 
@@ -52,18 +55,10 @@ const createBoard = (async (req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const updateBoard = ((req, res) => {
+const updateBoard = (async(req, res) => {
     const id = Number(req.params.id)  
-    const index = boards.findIndex((board) => board.id === id)
-    const updatedBoard = {
-        id: boards[index].id,
-        name: req.body.name,
-        lists: req.body.lists,
-        updatedAt: new Date(Date.now()),
-        createdAt: boards[index].createdAt,
-        labels: req.body.labels
-    }
-    boards[ index ] = updatedBoard
+    const updatedBoard = req.body
+    await Board.update(updatedBoard, {where : { id: id }})
     res.status(200).json('Board updated with Id ' + id)
 })
 
@@ -72,10 +67,9 @@ const updateBoard = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const deleteBoard = ((req, res) => { 
+const deleteBoard = (async (req, res) => { 
     const id = Number(req.params.id)
-    const index = boards.findIndex((board) => board.id === id)
-    boards.splice(index, 1)
+    await Board.destroy({ where: { id: id } })
     res.status(200).json('Board deleted with Id '+ id)
 })
 

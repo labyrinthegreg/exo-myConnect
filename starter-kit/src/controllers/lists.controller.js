@@ -1,13 +1,15 @@
-const lists = require('../models/lists.json')
+const {sequelize} = require('../models')
 const logger = require('../utils/logger')
-const {createCard}  = require('./cards.controller')
+const { createCard } = require('./cards.controller')
+const List = sequelize.models.List
 
 /**
  * Get all lists
  * @param {*} req 
  * @param {*} res 
  */
-const getLists = ((req, res) => {
+const getLists = (async (req, res) => {
+    const lists = await List.findAll()
     res.json(lists)
 })
 
@@ -16,9 +18,10 @@ const getLists = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const getListById = ((req, res) => {
+const getListById = (async (req, res) => {
     const id = Number(req.params.id)  
-    res.json(lists.find((list) => list.id === id))
+    const list = await List.findByPk(id)
+    res.json(list)
 })
 
 /**
@@ -26,14 +29,9 @@ const getListById = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const createList = ((req, res) => { 
-    const newList = {
-        id: new Date().valueOf(),
-        name: req.body.name,
-        cards: req.body.cards,
-        createdAt: new Date(Date.now())
-    }
-    lists.push(newList)
+const createList = (async (req, res) => { 
+    const newList = req.body
+    await List.create(newList)
     res.status(200).send(newList)
 })
 
@@ -43,20 +41,15 @@ const createList = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const createCardInList = ((req, res) => {
+const createCardInList = (async (req, res) => {
     const id = Number(req.params.id)
-    const index = lists.findIndex((list) => list.id === id)
-    req.body["id"] = new Date().valueOf()
-    createCard(req, res)
-    let updatedCards = lists[ index ].cards
-    updatedCards.push(req.body.id)
-    const updatedList = {
-        id: lists[index].id,
-        name: lists[index].name,
-        cards: updatedCards,
-        createdAt: lists[index].createdAt
-    }
-    lists[ index ] = updatedList
+    req.body["noNeedResponse"] = true
+    let cardId = await createCard(req, res)
+    await List.findOne({ where: { id: id } }).then(async (list) => {
+        let listCards =  Array.from(JSON.parse(list.cards))
+    listCards.push(cardId)
+    await List.update({cards: listCards}, {where: {id: id}})
+    })
     res.status(200).json('Card added in list with Id ' + id)
 })
 
@@ -65,16 +58,10 @@ const createCardInList = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const updateList = ((req, res) => {
+const updateList = (async (req, res) => {
     const id = Number(req.params.id)  
-    const index = lists.findIndex((list) => list.id === id)
-    const updatedList = {
-        id: lists[index].id,
-        name: req.body.name,
-        cards: req.body.cards,
-        createdAt: lists[index].createdAt
-    }
-    lists[ index ] = updatedList
+    const updatedList = req.body
+    await List.update(updatedList, {where: {id: id} })
     res.status(200).json('List updated with Id ' + id)
 })
 
@@ -83,31 +70,23 @@ const updateList = ((req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-const switchCardList = ((req, res) => {
+const switchCardList = (async (req, res) => {
     const initialListId = Number(req.params.id)  
     const recipientListId = Number(req.body.recipientId) 
     const cardId = Number(req.body.cardId) 
-    const initialListIndex = lists.findIndex((list) => list.id === initialListId)
-    const recipientListIndex = lists.findIndex((list) => list.id === recipientListId)
-    let initialListCards = lists[initialListIndex].cards
-    let recipientListCards = lists[ recipientListIndex ].cards
+    let initialListCards
+    let recipientListCards
+    await List.findByPk(initialListId).then(async (list) => {
+        initialListCards = Array.from(JSON.parse(list.cards))
+    })
+    await List.findByPk(recipientListId).then(async (list) => { 
+        recipientListCards = Array.from(JSON.parse(list.cards))
+    })
     let initialCardIndex = initialListCards.findIndex(card => card === cardId)
     recipientListCards.push(initialListCards[initialCardIndex])
     initialListCards.splice(initialCardIndex, 1)
-    const initialUpdatedList = {
-        id: lists[initialListIndex].id,
-        name: lists[initialListIndex].name,
-        cards: initialListCards,
-        createdAt: lists[initialListIndex].createdAt
-    }
-    const recipientUpdatedList = {
-        id: lists[recipientListIndex].id,
-        name: lists[recipientListIndex].name,
-        cards: recipientListCards,
-        createdAt: lists[recipientListIndex].createdAt
-    }
-    lists[ initialListIndex ] = initialUpdatedList
-    lists[ recipientListIndex ] = recipientUpdatedList
+    await List.update({cards: initialListCards}, {where : {id: initialListId}})
+    await List.update({cards: recipientListCards}, {where : {id: recipientListId}})
     res.status(200).json('Card swith between list with id ' + initialListId + ' to list with id ' + recipientListId)
 })
 
@@ -118,8 +97,7 @@ const switchCardList = ((req, res) => {
  */
 const deleteList = ((req, res) => { 
     const id = Number(req.params.id)
-    const index = lists.findIndex((list) => list.id === id)
-    lists.splice(index, 1)
+    List.destroy({ where: { id: id } })
     res.status(200).json('List deleted with Id '+ id)
 })
 

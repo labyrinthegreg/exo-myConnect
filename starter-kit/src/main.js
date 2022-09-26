@@ -13,6 +13,10 @@ app.use(morgan('combined'))
 app.use(cors())
 app.use(bodyParser.json())
 
+// Database importations
+const { connectionDb } = require('./models/index.js')
+connectionDb()
+
 // insert your router here
 // Cards router
 const cards_router = require("./routers/cards.routes")
